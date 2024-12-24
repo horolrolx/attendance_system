@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> GREEN ORANGE LAB </title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        :root {
+            --primary-color: #f0f0f0;
+            --background-color: #ffffff;
+            --table-bg: #f9f9f9;
+            --hover-color: #e0e0e0;
+            --border-color: #cccccc;
+            --text-color: #333333;
+
+            --outer-radius: 10px;
+            --inner-radius: 5px;
+            --padding-normal: 10px;
+            --container-max-width: 480px;
+
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --transition: all 0.2s ease;
+        }
+
+        body {
+            margin: 0 auto;
+            padding: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: var(--container-max-width);
+            flex-direction: column;
+            gap: 15px;
+            box-sizing: border-box; /* 부모 컨테이너의 크기 계산 포함 */
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        .container {
+            width: 100%;
+            background-color: var(--primary-color);
+            border-radius: var(--outer-radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            text-align: center;
+            box-sizing: border-box; /* 테두리를 포함한 크기 조정 */
+        }
+
+        .title {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin: 10px 0;
+            display: flex;
+            flex-direction: column; /* 수직 정렬 */
+            gap: 10px; /* 입력 필드와 버튼 사이 간격 */
+        }
+
+        input {
+            width: 100%;
+            padding: var(--padding-normal);
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--inner-radius);
+            box-sizing: border-box; /* 테두리를 포함한 크기 조정 */
+        }
+
+        button {
+            width: 100%; /* 버튼을 컨테이너 너비에 맞춤 */
+            padding: var(--padding-normal);
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: var(--inner-radius);
+            transition: var(--transition);
+            box-sizing: border-box; /* 테두리를 포함한 크기 조정 */
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #password-message {
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .table-wrapper {
+            background-color: var(--table-bg);
+            border-radius: var(--outer-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: var(--padding-normal);
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        tr:hover {
+            background-color: var(--hover-color);
+            transition: var(--transition);
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: var(--inner-radius);
+            color: #ffffff;
+        }
+
+        .status-leave {
+            background-color: #e57373; /* 빨간색 */
+        }
+
+        .status-arrive {
+            background-color: #81c784; /* 초록색 */
+        }
+
+        .status-other {
+            background-color: #64b5f6; /* 파란색 */
+        }
+    </style>
+</head>
+<body>
+    <!-- 출근 등록 헤더 -->
+    <div class="container">
+        <h1> GREEN ORANGE LAB </h1>
+    </div>
+
+    <!-- 비밀번호 입력 섹션 -->
+    <div class="container">
+        <div class="input-group">
+            <p>오늘의 비밀번호를 입력하세요</p>
+            <input type="text" id="password" placeholder="비밀번호 입력" />
+            <button onclick="verifyPassword()">비밀번호 확인</button>
+            <p id="password-message" style="color: red;"></p>
+        </div>
+    </div>
+
+    <!-- 출근 이름 등록 섹션 -->
+    <div id="attendance-section" class="container" style="display: none;">
+        <div class="input-group">
+            <p>이름을 입력해주세요</p>
+            <input type="text" id="name" placeholder="이름 입력" />
+            <button onclick="submitData()">출근</button>
+            <p id="message"></p>
+        </div>
+    </div>
+
+    <script>
+        // Firebase 초기화
+        const firebaseConfig = {
+            apiKey: "AIzaSyDv5yATFModgD7gfmXfnADoiaVLQjgHUmc",
+            authDomain: "greenorange-caf82.firebaseapp.com",
+            databaseURL: "https://greenorange-caf82-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "greenorange-caf82",
+            storageBucket: "greenorange-caf82.firebasestorage.app",
+            messagingSenderId: "458251861998",
+            appId: "1:458251861998:ios:c0c7c37b71504aae7d18ff"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let todaysPassword = ""; // 오늘의 비밀번호를 저장할 변수
+
+        // Firebase에서 오늘의 비밀번호 가져오기
+        database.ref("todaysPassword").once("value")
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    todaysPassword = snapshot.val(); // 오늘의 비밀번호 저장
+                    console.log("오늘의 비밀번호:", todaysPassword);
+                } else {
+                    console.error("비밀번호가 데이터베이스에 없습니다.");
+                }
+            })
+            .catch((error) => {
+                console.error("비밀번호 가져오기 오류:", error);
+            });
+
+        // 비밀번호 확인 함수
+        function verifyPassword() {
+            const enteredPassword = document.getElementById("password").value;
+
+            if (enteredPassword === todaysPassword) {
+                document.getElementById("password-message").innerText = "비밀번호가 확인되었습니다!";
+                document.getElementById("password-message").style.color = "green";
+                document.getElementById("attendance-section").style.display = "block"; // 출근 등록 섹션 표시
+                document.getElementById("name").focus(); // 이름 입력 필드로 커서 이동
+            } else {
+                document.getElementById("password-message").innerText = "비밀번호가 일치하지 않습니다.";
+                document.getElementById("password-message").style.color = "red";
+            }
+        }
+        
+        // 엔터 키 감지 함수
+            document.addEventListener("DOMContentLoaded", function () {
+                // 비밀번호 입력 필드에서 엔터 키 감지
+                document.getElementById("password").addEventListener("keydown", function (event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault(); // 기본 동작 방지
+                        document.querySelector("button[onclick='verifyPassword()']").click(); // 버튼 클릭
+                    }
+                });
+
+                // 이름 입력 필드에서 엔터 키 감지
+                document.getElementById("name").addEventListener("keydown", function (event) {
+                    if (event.key === "Enter") {
+                        event.preventDefault(); // 기본 동작 방지
+                        document.querySelector("button[onclick='submitData()']").click(); // 버튼 클릭
+                    }
+                });
+            });
+
+        // 허용된 이름 목록
+        const allowedNames = [
+            "송창석", "안순광", "최성원", "김현서", "곽민성",
+            "장가연", "김경은", "김정우", "김경윤", "주아리"
+        ];
+
+        // 한국 시간으로 변환된 타임스탬프 생성 함수
+        function getKoreanTimestamp() {
+            const now = new Date();
+            const options = {
+                timeZone: "Asia/Seoul",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            };
+            const formatter = new Intl.DateTimeFormat("en-CA", options);
+            return formatter.format(now).replace(",", "").replace(" ", "T");
+        }
+
+        // 출근 데이터 저장 함수
+        function submitData() {
+            const name = document.getElementById("name").value;
+            const timestamp = getKoreanTimestamp(); // 한국 시간 기준으로 타임스탬프 생성
+
+            // 입력된 이름이 허용된 이름 목록에 있는지 확인
+            if (!allowedNames.includes(name)) {
+                alert("허용되지 않은 이름입니다. 출근 등록이 불가능합니다.");
+                return;
+            }
+
+            if (name) {
+                // 데이터베이스에서 동일한 이름이 있는지 확인
+                database.ref("users").orderByChild("name").equalTo(name).once("value", (snapshot) => {
+                    if (snapshot.exists()) {
+                        // 동일한 이름이 있는 경우, 해당 사용자의 출근 시간만 업데이트
+                        const userKey = Object.keys(snapshot.val())[0]; // 첫 번째 사용자 키 가져오기
+                        database.ref(`users/${userKey}`).update({
+                            status: "출근",
+                            timestamp: timestamp,
+                            checkoutTimestamp: "" // 퇴근 시간 초기화
+                        }).then(() => {
+                            document.getElementById("message").innerText = "출근 시간이 업데이트되었습니다!";
+                            document.getElementById("name").value = ""; // 입력 필드 초기화
+                            alert("출근 시간이 업데이트되었습니다!");
+                            location.reload(); // 새로고침
+                        }).catch((error) => {
+                            console.error("Error:", error);
+                            alert("업데이트 중 오류가 발생했습니다.");
+                        });
+                    } else {
+                        // 동일한 이름이 없으면 새로운 데이터 추가
+                        database.ref("users").push({
+                            name: name,
+                            status: "출근",
+                            timestamp: timestamp,
+                            checkoutTimestamp: "" // 퇴근 시간 초기화
+                        }).then(() => {
+                            document.getElementById("message").innerText = "출근 완료!";
+                            document.getElementById("name").value = ""; // 입력 필드 초기화
+                            alert("출근 완료!");
+                            location.reload(); // 새로고침
+                        }).catch((error) => {
+                            console.error("Error:", error);
+                            alert("출근 중 오류가 발생했습니다.");
+                        });
+                    }
+                });
+            } else {
+                alert("이름을 입력해주세요.");
+            }
+        }
+    </script>
+</body>
+</html>
