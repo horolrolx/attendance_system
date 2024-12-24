@@ -50,16 +50,6 @@
 			path = status;
 			sourceTree = "<group>";
 		};
-		45361F842D155DBB000D88B4 /* statusTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = statusTests;
-			sourceTree = "<group>";
-		};
-		45361F8E2D155DBB000D88B4 /* statusUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = statusUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,8 +94,6 @@
 			isa = PBXGroup;
 			children = (
 				45361F732D155DBA000D88B4 /* status */,
-				45361F842D155DBB000D88B4 /* statusTests */,
-				45361F8E2D155DBB000D88B4 /* statusUITests */,
 				45361F722D155DBA000D88B4 /* Products */,
 				DB50B5DF98FF3F8C3B08E924 /* Pods */,
 				07CAE08830327E1D4931C079 /* Frameworks */,
@@ -174,9 +162,6 @@
 			dependencies = (
 				45361F832D155DBB000D88B4 /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				45361F842D155DBB000D88B4 /* statusTests */,
-			);
 			name = statusTests;
 			productName = statusTests;
 			productReference = 45361F812D155DBB000D88B4 /* statusTests.xctest */;
@@ -196,9 +181,6 @@
 			);
 			dependencies = (
 				45361F8D2D155DBB000D88B4 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				45361F8E2D155DBB000D88B4 /* statusUITests */,
 			);
 			name = statusUITests;
 			productName = statusUITests;
